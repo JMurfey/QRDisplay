@@ -13,9 +13,11 @@ const DataForm = ({setQrData}) => {
     const loadData = async () => {
       try {
         const dataExists = await RNFS.exists(path);
-
-
-        
+        // ...rest of the code inside the try block...
+      } catch (error) {
+        console.error('An error occurred while loading data:', error);
+      }
+    };
     loadData();
   }, []);
 
