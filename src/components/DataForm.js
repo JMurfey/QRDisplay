@@ -6,6 +6,7 @@ const DataForm = ({setQrData}) => {
   const [agency, setAgency] = useState('');
   const [clientName, setClientName] = useState('');
   const [clientID, setClientID] = useState('0');
+  const [checkingForData, setCheckingForData] = useState(true);
 
   const path = `${RNFS.DocumentDirectoryPath}/data.json`;
 
@@ -13,11 +14,24 @@ const DataForm = ({setQrData}) => {
     const loadData = async () => {
       try {
         const dataExists = await RNFS.exists(path);
-        // ...rest of the code inside the try block...
+        if (dataExists) {
+          const rawData = await RNFS.readFile(path, 'utf8');
+          const parsedData = JSON.parse(rawData);
+          setAgency(parsedData.agency);
+          setClientName(parsedData.clientName);
+          setClientID(parsedData.clientID.toString());
+          console.log('Data loaded successfully!!!');
+          setQrData(parsedData);
+        } else {
+          console.log('Data file does not exist');
+        }
       } catch (error) {
         console.error('An error occurred while loading data:', error);
+      } finally {
+        setCheckingForData(false);
       }
     };
+    console.log('Going to load data');
     loadData();
   }, []);
 
@@ -37,6 +51,10 @@ const DataForm = ({setQrData}) => {
       console.error('Error saving data:', error);
     }
   };
+
+  if (checkingForData) {
+    return <Text style={styles.checkingText}>Checking for Data...</Text>;
+  }
 
   return (
     <View style={styles.container}>
@@ -75,7 +93,13 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     padding: 10,
     marginBottom: 20,
-    width: 240, // add this line to make the input  },
+    width: 240,
+  },
+  checkingText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
